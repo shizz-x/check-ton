@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./style.scss";
 import { TonProofDemoApi } from "../../TonProofDemoApi";
 import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
@@ -10,25 +10,35 @@ export const TonProofDemo = () => {
   const [tonConnectUI] = useTonConnectUI();
   const wallet = useTonWallet();
   const address = useTonAddress(true);
+  const [proof, setProof] = useState(null);
 
-  useEffect(
-    () =>
-      tonConnectUI.onStatusChange(async (w) => {
-        if (!w || w.account.chain === CHAIN.TESTNET) {
-          TonProofDemoApi.reset();
-          setAuthorized(false);
-          return;
-        }
+  useEffect(() => {
+    if (!proof) {
+      return;
+    }
+    if (!address) {
+      return;
+    }
+    const doJob = async () => {
+      await TonProofDemoApi.checkProof(proof.proof, {
+        ...proof.account,
+        friendlyAddress: address,
+      });
+    };
+    doJob();
+  }, [address, proof]);
 
-        if (w.connectItems.tonProof.proof && address) {
-          await TonProofDemoApi.checkProof(w.connectItems.tonProof.proof, {
-            ...w.account,
-            friendlyAddress: address,
-          });
-        }
-      }),
-    [tonConnectUI]
-  );
+  useEffect(() => {
+    tonConnectUI.onStatusChange(async (w) => {
+      if (!w || w.account.chain === CHAIN.TESTNET) {
+        return;
+      }
+
+      if (w.connectItems.tonProof.proof) {
+        setProof({ proof: w.connectItems.tonProof.proof, account: w.account });
+      }
+    });
+  }, [tonConnectUI]);
 
   const auth = async () => {
     setTimeout(async () => {
@@ -50,8 +60,6 @@ export const TonProofDemo = () => {
     <div className="ton-proof-demo">
       <h3>NEST-FRONT-EXAMPLE</h3>
       <TonConnectButton />
-
-      {JSON.stringify(wallet)}
     </div>
   );
 };
