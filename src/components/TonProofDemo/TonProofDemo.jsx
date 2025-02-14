@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import ReactJson from "react-json-view";
+import React, { useEffect } from "react";
 import "./style.scss";
 import { TonProofDemoApi } from "../../TonProofDemoApi";
 import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
+import { useTonAddress } from "@tonconnect/ui-react";
 import { CHAIN } from "@tonconnect/ui-react";
+import { TonConnectButton } from "@tonconnect/ui-react";
 
 export const TonProofDemo = () => {
-  const [data, setData] = useState({});
-  const wallet = useTonWallet();
-  const [authorized, setAuthorized] = useState(false);
   const [tonConnectUI] = useTonConnectUI();
+  const wallet = useTonWallet();
+  const address = useTonAddress(true);
 
   useEffect(
     () =>
@@ -20,20 +20,12 @@ export const TonProofDemo = () => {
           return;
         }
 
-        if (w.connectItems.tonProof.proof) {
-          await TonProofDemoApi.checkProof(
-            w.connectItems.tonProof.proof,
-            w.account
-          );
+        if (w.connectItems.tonProof.proof && address) {
+          await TonProofDemoApi.checkProof(w.connectItems.tonProof.proof, {
+            ...w.account,
+            friendlyAddress: address,
+          });
         }
-
-        // if (!TonProofDemoApi.accessToken) {
-        //   tonConnectUI.disconnect();
-        //   setAuthorized(false);
-        //   return;
-        // }
-
-        // setAuthorized(true);
       }),
     [tonConnectUI]
   );
@@ -43,7 +35,6 @@ export const TonProofDemo = () => {
       const payload = await TonProofDemoApi.generatePayload();
 
       if (payload) {
-        console.log("PAYLOAD:", payload);
         tonConnectUI.setConnectRequestParameters({
           state: "ready",
           value: payload,
@@ -53,24 +44,14 @@ export const TonProofDemo = () => {
   };
   useEffect(() => {
     auth();
-  }, []);
-
-  const handleClick = useCallback(async () => {
-    if (!wallet) {
-      return;
-    }
-    const response = await TonProofDemoApi.getAccountInfo(wallet.account);
-
-    setData(response);
   }, [wallet]);
 
   return (
     <div className="ton-proof-demo">
-      <h3>Demo backend API with ton_proof verification</h3>
+      <h3>NEST-FRONT-EXAMPLE</h3>
+      <TonConnectButton />
 
-      {/* <button onClick={auth}>AUTH</button> */}
-
-      <ReactJson src={data} name="response" theme="ocean" />
+      {JSON.stringify(wallet)}
     </div>
   );
 };

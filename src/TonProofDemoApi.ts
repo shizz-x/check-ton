@@ -3,7 +3,7 @@ import {
   ConnectAdditionalRequest,
   TonProofItemReplySuccess,
 } from "@tonconnect/ui-react";
-import "./patch-local-storage-for-github-pages";
+
 class TonProofDemoApiService {
   private localStorageKey = "demo-api-access-token";
 
@@ -39,7 +39,7 @@ class TonProofDemoApiService {
       const reqBody = {
         rawAddress: account.address,
         network: account.chain,
-        friendlyAddress: account.address,
+        friendlyAddress: account.friendlyAddress,
 
         publicKey: account.publicKey,
         stateinit: account.walletStateInit,
@@ -48,8 +48,6 @@ class TonProofDemoApiService {
           state_init: account.walletStateInit,
         },
       };
-
-      console.log(reqBody);
 
       const response = await (
         await fetch(`${this.host}/v2/auth/signin/tonconnect`, {
@@ -72,21 +70,7 @@ class TonProofDemoApiService {
     }
   }
 
-  async getAccountInfo(account: Account) {
-    const response = await (
-      await fetch(`${this.host}/dapp/getAccountInfo?network=${account.chain}`, {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json",
-        },
-      })
-    ).json();
-
-    return response as {};
-  }
-
   reset() {
-    this.accessToken = null;
     localStorage.removeItem(this.localStorageKey);
     this.generatePayload();
   }

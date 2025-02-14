@@ -1,9 +1,7 @@
 import "./App.scss";
 import "./trackers";
 import { THEME, TonConnectUIProvider } from "@tonconnect/ui-react";
-import { Footer } from "./components/Footer/Footer";
-import { Header } from "./components/Header/Header";
-import { TxForm } from "./components/TxForm/TxForm";
+
 import { TonProofDemo } from "./components/TonProofDemo/TonProofDemo";
 
 function App() {
@@ -226,15 +224,9 @@ function App() {
           },
         ],
       }}
-      actionsConfiguration={{
-        twaReturnUrl: "https://t.me/tc_twa_demo_bot/start",
-      }}
     >
       <div className="app">
-        <Header />
-        {/* <TxForm /> */}
         <TonProofDemo />
-        <Footer />
       </div>
     </TonConnectUIProvider>
   );
